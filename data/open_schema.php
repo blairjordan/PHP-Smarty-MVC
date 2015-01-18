@@ -350,6 +350,118 @@ class DataData {
 		return $return_array;
 	}
 
+	// Find all data pertaining to things with a specific key and value
+	static function find_thing_data($key = '', $value = '', $exact = FALSE) {
+        
+		/* Connect to the database. */ 
+		$dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS); 
+
+		/* Specify database instance using config constant. */ 
+		mysql_select_db(__DB_INSTANCE); 
+
+		/* Escape parameters to prevent injection. */ 
+		$key = mysql_real_escape_string($key); 
+		$value = mysql_real_escape_string($value); 
+
+		/* Append wildcards if not searching for exact match. */
+		$value = ($exact) ? $value : '%'.$value.'%';
+        $key = empty($key) ? 'null' : "'" . $key . "'";
+        $value  = empty($value) ? 'null' : "'" . $value . "'";
+
+		/* Construct select statement for thing data. */ 
+		$query = "
+		SELECT  `thing_id` ,  `key` ,  `value` 
+		FROM  `data` d1
+		WHERE EXISTS (
+		SELECT  `thing_id` 
+		FROM  `data` d2
+		WHERE  `key` =  $key
+		AND d1.`thing_id` = d2.`thing_id` 
+		AND LOWER( `value` ) LIKE LOWER( $value )
+		) ORDER BY `value` DESC";
+
+		/* Execute query. */ 
+		$result = mysql_query($query); 
+	
+		/* Create an array to store the results of the query. */ 
+		$return_array = array(); 
+	
+		/* Push each line onto the return array. */ 
+		while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) { 
+			array_push($return_array, $row); 
+		} 
+
+		/* Free resources. */ 
+		mysql_free_result($result); 
+		mysql_close(); 
+		
+		/* Return an associative array */ 
+		return $return_array; 		
+	}
+
+    // Find all data pertaining to things with specific keys and values
+	static function find_thing_data_complex($keyValues, $exact = FALSE) {
+
+		/* Connect to the database. */ 
+		$dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS); 
+
+		/* Specify database instance using config constant. */ 
+		mysql_select_db(__DB_INSTANCE); 
+
+        $keyValuesSanitised = array();
+        
+        foreach($keyValues as $key => $value) {
+            
+            $keyValues[$key] =  mysql_real_escape_string($keyValues[$key]);
+            
+		    /* Append wildcards if not searching for exact match. */
+		    $keyValues[$key] = ($exact) ? $keyValues[$key] : '%'.$keyValues[$key].'%';
+            $keyValues[$key]  = empty($keyValues[$key]) ? 'null' : "'" . $keyValues[$key] . "'";
+            
+        }
+
+		/* Construct select statement for thing data. */ 
+		$query = "
+		SELECT  `thing_id` ,  `key` ,  `value` 
+		FROM  `data` d1
+		WHERE ";
+        
+        $keyCount = 0;
+        
+        foreach ($keyValues as $key => $value) {
+            
+            $query = ($keyCount > 0) ? ($query . ') AND ') : $query;
+            
+            $query = $query . 
+            " EXISTS (
+            SELECT  `thing_id` 
+		    FROM  `data`
+            WHERE  d1.`thing_id` = `thing_id`
+            AND `key` =  '" . $key . "' AND LOWER( `value` ) LIKE LOWER( " . $value . " ) ";
+            $keyCount++;
+        }
+		
+        $query = $query . ") ORDER BY `thing_id`, `key`, `value` DESC";
+        
+		/* Execute query. */ 
+		$result = mysql_query($query); 
+        
+		/* Create an array to store the results of the query. */ 
+		$return_array = array(); 
+	
+		/* Push each line onto the return array. */ 
+		while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) { 
+			array_push($return_array, $row); 
+		} 
+
+		/* Free resources. */ 
+		mysql_free_result($result); 
+		mysql_close(); 
+		
+		/* Return an associative array */ 
+		return $return_array; 		
+	}
+
 static function all($thing_id) { 
 	/* Connect to the database. */ 
 	$dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS); 
@@ -360,7 +472,7 @@ static function all($thing_id) {
 	/* Escape parameters to prevent injection. */ 
 	$thing_id = mysql_real_escape_string($thing_id); 
 	
-	/* Construct delete statement for thing data. */ 
+	/* Construct select statement for thing data. */ 
 	$query = "SELECT `key` , `value` FROM `data` WHERE `thing_id` = $thing_id"; 
 	
 	/* Execute query. */ 
