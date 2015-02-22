@@ -324,6 +324,8 @@ class DataData {
 		$value = empty($value) ? 'null' : "'" . $value . "'"; 
 		$key = empty($key) ? 'null' : "'" . $key . "'";
 		
+		// TODO: Get multiples!!!!
+		
 		/* Construct delete statement for thing data. */ 
 		$query = "SELECT `thing_id` AS thing_id 
 			FROM `data` 
@@ -400,7 +402,7 @@ class DataData {
 	}
 
     // Find all data pertaining to things with specific keys and values
-	static function find_thing_data_complex($keyValues, $exact = FALSE) {
+	static function find_thing_data_complex($keyValues, $type, $exact = FALSE) {
 
 		/* Connect to the database. */ 
 		$dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS); 
@@ -408,6 +410,8 @@ class DataData {
 		/* Specify database instance using config constant. */ 
 		mysql_select_db(__DB_INSTANCE); 
 
+        $type = mysql_real_escape_string($type);
+        
         $keyValuesSanitised = array();
         
         foreach($keyValues as $key => $value) {
@@ -423,10 +427,14 @@ class DataData {
 		/* Construct select statement for thing data. */ 
 		$query = "
 		SELECT  `thing_id` ,  `key` ,  `value` 
-		FROM  `data` d1
-		WHERE ";
+		FROM  `thing` t, `data` d1
+		WHERE t.id = d1.thing_id
+        AND t.type = '" . $type . "'";
+        
         
         $keyCount = 0;
+        
+        if (!empty($keyValues)) { $query = $query . " AND "; }
         
         foreach ($keyValues as $key => $value) {
             
@@ -440,9 +448,11 @@ class DataData {
             AND `key` =  '" . $key . "' AND LOWER( `value` ) LIKE LOWER( " . $value . " ) ";
             $keyCount++;
         }
-		
-        $query = $query . ") ORDER BY `thing_id`, `key`, `value` DESC";
         
+        if (!empty($keyValues)) { $query = $query . " ) "; }
+		
+        $query = $query . " ORDER BY `thing_id`, `key`, `value` DESC";
+
 		/* Execute query. */ 
 		$result = mysql_query($query); 
         
@@ -450,12 +460,15 @@ class DataData {
 		$return_array = array(); 
 	
 		/* Push each line onto the return array. */ 
-		while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) { 
-			array_push($return_array, $row); 
-		} 
+		if ($result) {
+            while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) { 
+                array_push($return_array, $row); 
+            }
+            
+		    /* Free resources. */ 
+		    mysql_free_result($result); 
+        }
 
-		/* Free resources. */ 
-		mysql_free_result($result); 
 		mysql_close(); 
 		
 		/* Return an associative array */ 
