@@ -5,13 +5,13 @@ class ThingData {
     static function add($type) {
 
         /* Connect to the database. */
-        $dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS);
+        $dbc = new mysqli(__DB_HOST, __DB_USER, __DB_PASS, __DB_INSTANCE);
 
         /* Specify database instance using config constant. */
-        mysql_select_db(__DB_INSTANCE);
+        $dbc->select_db(__DB_INSTANCE);
 
         /* Escape parameters to prevent injection. */
-        $type = mysql_real_escape_string($type);
+        $type = $dbc->real_escape_string($type);
 
         /* Resolve empty strings to null. */
         $type = empty($type) ? 'null' : "'" . $type . "'";
@@ -21,13 +21,10 @@ class ThingData {
                   VALUES (IFNULL($type,null))";
 
         /* Execute query. */
-        mysql_query($query);
+        mysqli_query($dbc, $query);
 
         /* The ID of the newly created thing. */
-        $thing_id = mysql_insert_id();
-
-        /* Close MySQL connection. */
-        mysql_close();
+        $thing_id = mysqli_insert_id($dbc);
         
         /* Return the ID of the new thing. */
         return $thing_id;
@@ -36,13 +33,13 @@ class ThingData {
     static function remove($thing_id) {
         
         /* Connect to the database. */
-        $dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS);
+        $dbc = new mysqli(__DB_HOST, __DB_USER, __DB_PASS, __DB_INSTANCE);
 
         /* Specify database instance using config constant. */
-        mysql_select_db(__DB_INSTANCE);
+        $dbc->select_db(__DB_INSTANCE);
 
         /* Escape parameters to prevent injection. */
-        $thing_id = mysql_real_escape_string($thing_id);
+        $thing_id = $dbc->real_escape_string($thing_id);
 
         /* Resolve empty strings to null. */
         $thing_id = empty($thing_id) ? 'null' : "'" . $thing_id . "'";
@@ -52,22 +49,19 @@ class ThingData {
                   WHERE `id` = $thing_id";
 
         /* Execute query. */
-        mysql_query($query);
-       
-        /* Close MySQL connection. */
-        mysql_close();
+        mysqli_query($dbc, $query);
     }
 	
 	static function all($type) { 
 	
 		/* Connect to the database. */
-		$dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS); 
+		$dbc = new mysqli(__DB_HOST, __DB_USER, __DB_PASS, __DB_INSTANCE); 
 	
 		/* Specify database instance using config constant. */ 
-		mysql_select_db(__DB_INSTANCE); 
+		$dbc->select_db(__DB_INSTANCE); 
 	
 		/* Escape parameters to prevent injection. */
-		$type = mysql_real_escape_string($type); 
+		$type = $dbc->real_escape_string($type); 
 	
 		/* Resolve empty strings to null. */ 
 		$type = empty($type) ? 'null' : "'" . $type . "'"; 
@@ -79,19 +73,18 @@ class ThingData {
 			ORDER BY `id`";
 	
 		/* Execute query. */ 
-		$result = mysql_query($query); 
+		$result = mysqli_query($dbc, $query); 
 	
 		/* Create an array to store the results of the query. */
 		$return_array = array(); 
 	
 		/* Push each line onto the return array. */
-		while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) { 
+		while ($row = mysqli_fetch_assoc($result)) { 
 			array_push($return_array, $row); 
 		} 
 	
 		/* Free resources. */ 
-		mysql_free_result($result); 
-		mysql_close(); 
+		mysqli_free_result($result); 
 		
 		/* Return an associative array */ 
 		return $return_array; 
@@ -100,13 +93,13 @@ class ThingData {
 	static function random($type, $limit) { 
 	
 		/* Connect to the database. */
-		$dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS); 
+		$dbc = new mysqli(__DB_HOST, __DB_USER, __DB_PASS, __DB_INSTANCE); 
 	
 		/* Specify database instance using config constant. */ 
-		mysql_select_db(__DB_INSTANCE); 
+		$dbc->select_db(__DB_INSTANCE); 
 	
 		/* Escape parameters to prevent injection. */
-		$type = mysql_real_escape_string($type); 
+		$type = $dbc->real_escape_string($type); 
 	
 		/* Resolve empty strings to null. */ 
 		$type = empty($type) ? 'null' : "'" . $type . "'"; 
@@ -118,19 +111,18 @@ class ThingData {
 			ORDER BY RAND( ) LIMIT $limit";
 	
 		/* Execute query. */ 
-		$result = mysql_query($query); 
+		$result = mysqli_query($dbc, $query); 
 	
 		/* Create an array to store the results of the query. */
 		$return_array = array(); 
 	
 		/* Push each line onto the return array. */
-		while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) { 
+		while ($row = mysqli_fetch_assoc($result)) { 
 			array_push($return_array, $row); 
 		} 
 	
 		/* Free resources. */ 
-		mysql_free_result($result); 
-		mysql_close(); 
+		mysqli_free_result($result); 
 		
 		/* Return an associative array */ 
 		return $return_array; 
@@ -142,15 +134,15 @@ class DataData {
     static function add($thing_id, $key, $value) {
 
         /* Connect to the database. */
-        $dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS);
+        $dbc = new mysqli(__DB_HOST, __DB_USER, __DB_PASS, __DB_INSTANCE);
 
         /* Specify database instance using config constant. */
-        mysql_select_db(__DB_INSTANCE);
+        $dbc->select_db(__DB_INSTANCE);
 
         /* Escape parameters to prevent injection. */
-        $thing_id = mysql_real_escape_string($thing_id);
-        $key = mysql_real_escape_string($key);
-        $value = mysql_real_escape_string($value);
+        $thing_id = $dbc->real_escape_string($thing_id);
+        $key = $dbc->real_escape_string($key);
+        $value = $dbc->real_escape_string($value);
 
         /* Resolve empty strings to null. */
         $thing_id = empty($thing_id) ? 'null' : "'" . $thing_id . "'";
@@ -164,25 +156,22 @@ class DataData {
                           IFNULL($value, null))";
 
         /* Execute query. */
-        mysql_query($query);
-        
-        /* Close MySQL connection. */
-        mysql_close();
+        mysqli_query($dbc, $query);
     }
     
     // Remove a specific piece of data
     static function remove($thing_id, $key = NULL, $value = NULL) {
         
         /* Connect to the database. */
-        $dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS);
+        $dbc = new mysqli(__DB_HOST, __DB_USER, __DB_PASS, __DB_INSTANCE);
 
         /* Specify database instance using config constant. */
-        mysql_select_db(__DB_INSTANCE);
+        $dbc->select_db(__DB_INSTANCE);
 
         /* Escape parameters to prevent injection. */
-        $thing_id = mysql_real_escape_string($thing_id);
-        $key = mysql_real_escape_string($key);
-        $value = mysql_real_escape_string($value);
+        $thing_id = $dbc->real_escape_string($thing_id);
+        $key = $dbc->real_escape_string($key);
+        $value = $dbc->real_escape_string($value);
 
         /* Resolve empty strings to null. */
         $thing_id = empty($thing_id) ? 'null' : "'" . $thing_id . "'";
@@ -197,46 +186,40 @@ class DataData {
 	 $query = ($value != "''") ? $query . " AND `data` = $value" : $query;
 
         /* Execute query. */
-        mysql_query($query);
-        
-        /* Close MySQL connection. */
-        mysql_close();
+        mysqli_query($dbc, $query);
     }
 
     // Remove all data associated with a thing
     static function removeAll($thing_id) {
         
         /* Connect to the database. */
-        $dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS);
+        $dbc = new mysqli(__DB_HOST, __DB_USER, __DB_PASS, __DB_INSTANCE);
 
         /* Specify database instance using config constant. */
-        mysql_select_db(__DB_INSTANCE);
+        $dbc->select_db(__DB_INSTANCE);
 
         /* Escape parameters to prevent injection. */
-        $thing_id = mysql_real_escape_string($thing_id);
+        $thing_id = $dbc->real_escape_string($thing_id);
 
         /* Construct delete statement for thing data. */
         $query = "DELETE FROM data
                   WHERE `thing_id` = $thing_id";
 
         /* Execute query. */
-        mysql_query($query);
-        
-        /* Close MySQL connection. */
-        mysql_close();
+        mysqli_query($dbc, $query);
     }
 
     static function exists($thing_id, $key) {
 
         /* Connect to the database. */
-        $dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS);
+        $dbc = new mysqli(__DB_HOST, __DB_USER, __DB_PASS, __DB_INSTANCE);
 
         /* Specify database instance using config constant. */
-        mysql_select_db(__DB_INSTANCE);
+        $dbc->select_db(__DB_INSTANCE);
 
         /* Escape parameters to prevent injection. */
-        $thing_id = mysql_real_escape_string($thing_id);
-        $key = mysql_real_escape_string($key);
+        $thing_id = $dbc->real_escape_string($thing_id);
+        $key = $dbc->real_escape_string($key);
 
         /* Resolve empty strings to null. */
         $thing_id = empty($thing_id) ? 'null' : "'" . $thing_id . "'";
@@ -249,16 +232,13 @@ class DataData {
                   AND `key` = $key";
 
         /* Execute query. */
-        $result = mysql_query($query);
+        $result = mysqli_query($dbc, $query);
         
         /* Fetch the query result. */
-        $data_count = mysql_fetch_array($result, MYSQL_ASSOC);
+        $data_count = mysqli_fetch_assoc($result);
         
         /* Free resources. */
-        mysql_free_result($result);
-        
-        /* Close MySQL connection. */
-        mysql_close();
+        mysqli_free_result($result);
         
         /* Return 'y' or 'n'. */
         return ($data_count['data_count'] > 0) ? true : false;
@@ -267,14 +247,14 @@ class DataData {
     static function find($thing_id = null, $key = null) {
 
         /* Connect to the database. */
-        $dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS);
+        $dbc = new mysqli(__DB_HOST, __DB_USER, __DB_PASS, __DB_INSTANCE);
 
         /* Specify database instance using config constant. */
-        mysql_select_db(__DB_INSTANCE);
+        $dbc->select_db(__DB_INSTANCE);
 
         /* Escape parameters to prevent injection. */
-        $thing_id = mysql_real_escape_string($thing_id);
-        $key = mysql_real_escape_string($key);
+        $thing_id = $dbc->real_escape_string($thing_id);
+        $key = $dbc->real_escape_string($key);
 
         /* Resolve empty strings to null. */
         $thing_id = empty($thing_id) ? 'null' : "'" . $thing_id . "'";
@@ -289,42 +269,39 @@ class DataData {
 
 	
         /* Execute query. */
-        $result = mysql_query($query);
+        $result = mysqli_query($dbc, $query);
  
-	/* Create an array to store the results of the query. */
-	$return_array = array();
-	
-	/* Push each line onto the return array. */
-	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
-        	array_push($return_array, $row);
-	}
+        /* Create an array to store the results of the query. */
+        $return_array = array();
 
-	/* Free resources. */
-	mysql_free_result($result);
-	mysql_close();
+        /* Push each line onto the return array. */
+        while ($row = mysqli_fetch_assoc($result)) {
+                array_push($return_array, $row);
+        }
 
-	/* Return an associative array of results. */
-	return $return_array;
+        /* Free resources. */
+        mysqli_free_result($result);
+
+        /* Return an associative array of results. */
+        return $return_array;
     }
 
 	// Find thing ID based on a key/ value pair 
 	static function find_thing_ID($key, $value, $limit = 1000) {
 	
 		/* Connect to the database. */ 
-		$dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS); 
+		$dbc = new mysqli(__DB_HOST, __DB_USER, __DB_PASS, __DB_INSTANCE); 
 		
 		/* Specify database instance using config constant. */
-		mysql_select_db(__DB_INSTANCE);
+		$dbc->select_db(__DB_INSTANCE);
 		
 		/* Escape parameters to prevent injection. */
-		$value = mysql_real_escape_string($value);
-		$key = mysql_real_escape_string($key); 
+		$value = $dbc->real_escape_string($value);
+		$key = $dbc->real_escape_string($key); 
 		
 		/* Resolve empty strings to null. */ 
 		$value = empty($value) ? 'null' : "'" . $value . "'"; 
 		$key = empty($key) ? 'null' : "'" . $key . "'";
-		
-		// TODO: Get multiples!!!!
 		
 		/* Construct delete statement for thing data. */ 
 		$query = "SELECT `thing_id` AS thing_id 
@@ -334,19 +311,18 @@ class DataData {
 			LIMIT $limit"; 
 	
 		/* Execute query. */ 
-		$result = mysql_query($query); 
+		$result = mysqli_query($dbc, $query); 
 		
 		/* Create an array to store the results of the query. */
 		$return_array = array();
 		
 		/* Push each line onto the return array. */
-		while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
+		while ($row = mysqli_fetch_assoc($result)) {
 			array_push($return_array, $row);
 		}
 		   
 		/* Free resources. */
-		mysql_free_result($result);
-		mysql_close();
+		mysqli_free_result($result);
 
 		/* Return an associative array of results. */
 		return $return_array;
@@ -356,14 +332,14 @@ class DataData {
 	static function find_thing_data($key = '', $value = '', $exact = FALSE) {
         
 		/* Connect to the database. */ 
-		$dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS); 
+		$dbc = new mysqli(__DB_HOST, __DB_USER, __DB_PASS, __DB_INSTANCE); 
 
 		/* Specify database instance using config constant. */ 
-		mysql_select_db(__DB_INSTANCE); 
+		$dbc->select_db(__DB_INSTANCE); 
 
 		/* Escape parameters to prevent injection. */ 
-		$key = mysql_real_escape_string($key); 
-		$value = mysql_real_escape_string($value); 
+		$key = $dbc->real_escape_string($key); 
+		$value = $dbc->real_escape_string($value); 
 
 		/* Append wildcards if not searching for exact match. */
 		$value = ($exact) ? $value : '%'.$value.'%';
@@ -383,40 +359,37 @@ class DataData {
 		) ORDER BY `value` DESC";
 
 		/* Execute query. */ 
-		$result = mysql_query($query); 
+		$result = mysqli_query($dbc, $query); 
 	
 		/* Create an array to store the results of the query. */ 
 		$return_array = array(); 
-	
+
 		/* Push each line onto the return array. */ 
-		while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) { 
+		while ($row = mysqli_fetch_assoc($result)) { 
 			array_push($return_array, $row); 
 		} 
 
 		/* Free resources. */ 
-		mysql_free_result($result); 
-		mysql_close(); 
+		mysqli_free_result($result); 
 		
 		/* Return an associative array */ 
 		return $return_array; 		
 	}
 
     // Find all data pertaining to things with specific keys and values
-	static function find_thing_data_complex($keyValues, $type, $exact = FALSE) {
+	static function find_thing_data_complex($keyValues, $exact = FALSE) {
 
 		/* Connect to the database. */ 
-		$dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS); 
+		$dbc = new mysqli(__DB_HOST, __DB_USER, __DB_PASS, __DB_INSTANCE); 
 
 		/* Specify database instance using config constant. */ 
-		mysql_select_db(__DB_INSTANCE); 
+		$dbc->select_db(__DB_INSTANCE); 
 
-        $type = mysql_real_escape_string($type);
-        
         $keyValuesSanitised = array();
         
         foreach($keyValues as $key => $value) {
             
-            $keyValues[$key] =  mysql_real_escape_string($keyValues[$key]);
+            $keyValues[$key] =  $dbc->real_escape_string($keyValues[$key]);
             
 		    /* Append wildcards if not searching for exact match. */
 		    $keyValues[$key] = ($exact) ? $keyValues[$key] : '%'.$keyValues[$key].'%';
@@ -427,14 +400,10 @@ class DataData {
 		/* Construct select statement for thing data. */ 
 		$query = "
 		SELECT  `thing_id` ,  `key` ,  `value` 
-		FROM  `thing` t, `data` d1
-		WHERE t.id = d1.thing_id
-        AND t.type = '" . $type . "'";
-        
+		FROM  `data` d1
+		WHERE ";
         
         $keyCount = 0;
-        
-        if (!empty($keyValues)) { $query = $query . " AND "; }
         
         foreach ($keyValues as $key => $value) {
             
@@ -448,28 +417,22 @@ class DataData {
             AND `key` =  '" . $key . "' AND LOWER( `value` ) LIKE LOWER( " . $value . " ) ";
             $keyCount++;
         }
-        
-        if (!empty($keyValues)) { $query = $query . " ) "; }
 		
-        $query = $query . " ORDER BY `thing_id`, `key`, `value` DESC";
-
+        $query = $query . ") ORDER BY `thing_id`, `key`, `value` DESC";
+        
 		/* Execute query. */ 
-		$result = mysql_query($query); 
+		$result = mysqli_query($dbc, $query); 
         
 		/* Create an array to store the results of the query. */ 
 		$return_array = array(); 
 	
 		/* Push each line onto the return array. */ 
-		if ($result) {
-            while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) { 
-                array_push($return_array, $row); 
-            }
-            
-		    /* Free resources. */ 
-		    mysql_free_result($result); 
-        }
+		while ($row = mysqli_fetch_assoc($result)) { 
+			array_push($return_array, $row); 
+		} 
 
-		mysql_close(); 
+		/* Free resources. */ 
+		mysqli_free_result($result); 
 		
 		/* Return an associative array */ 
 		return $return_array; 		
@@ -477,30 +440,29 @@ class DataData {
 
 static function all($thing_id) { 
 	/* Connect to the database. */ 
-	$dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS); 
+	$dbc = new mysqli(__DB_HOST, __DB_USER, __DB_PASS, __DB_INSTANCE); 
 	
 	/* Specify database instance using config constant. */ 
-	mysql_select_db(__DB_INSTANCE); 
+	$dbc->select_db(__DB_INSTANCE); 
 	
 	/* Escape parameters to prevent injection. */ 
-	$thing_id = mysql_real_escape_string($thing_id); 
+	$thing_id = $dbc->real_escape_string($thing_id); 
 	
 	/* Construct select statement for thing data. */ 
 	$query = "SELECT `key` , `value` FROM `data` WHERE `thing_id` = $thing_id"; 
 	
 	/* Execute query. */ 
-	$result = mysql_query($query); 
+	$result = mysqli_query($dbc, $query); 
 	
 	/* Create an array to store the results of the query. */ 
 	$return_array = array(); 
 	
 	/* Push each line onto the return array. */ 
-	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) { 
+	while ($row = mysqli_fetch_assoc($result)) { 
 		array_push($return_array, $row); 
 	} 
 	/* Free resources. */ 
-	mysql_free_result($result); 
-	mysql_close(); 
+	mysqli_free_result($result); 
 	
 	/* Return an associative array */ 
 	return $return_array; 
@@ -508,13 +470,13 @@ static function all($thing_id) {
 
    static function random($thing_id, $key, $limit) { 
    	/* Connect to the database. */ 
-   	$dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS); 
+   	$dbc = new mysqli(__DB_HOST, __DB_USER, __DB_PASS, __DB_INSTANCE); 
 
 	/* Specify database instance using config constant. */ 
-   	mysql_select_db(__DB_INSTANCE); 
+   	$dbc->select_db(__DB_INSTANCE); 
    
 	/* Escape parameters to prevent injection. */ 
-   	$key = mysql_real_escape_string($key); 
+   	$key = $dbc->real_escape_string($key); 
    
 	/* Resolve empty strings to null. */ 
    	$key = empty($key) ? 'null' : "'" . $key . "'"; 
@@ -523,16 +485,16 @@ static function all($thing_id) {
    	$query = "SELECT `key` , `value` FROM `data` WHERE `thing_id` = $thing_id AND `key` = $key ORDER BY RAND( ) LIMIT $limit"; 
 
 	/* Execute query. */ 
-   	$result = mysql_query($query); 
+   	$result = mysqli_query($dbc, $query); 
 
    	/* Create an array to store the results of the query. */ 
    	$return_array = array(); 
 
    	/* Push each line onto the return array. */ 
-   	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) { array_push($return_array, $row); } 
+   	while ($row = mysqli_fetch_assoc($result)) { array_push($return_array, $row); } 
 
    	/* Free resources. */ 
-   	mysql_free_result($result); mysql_close(); 
+   	mysqli_free_result($result); 
 
    	/* Return an associative array */ 
    	return $return_array; 
@@ -541,15 +503,15 @@ static function all($thing_id) {
     static function update($thing_id, $key, $value) {
         
         /* Connect to the database. */
-        $dbc = mysql_pconnect(__DB_HOST, __DB_USER, __DB_PASS);
+        $dbc = new mysqli(__DB_HOST, __DB_USER, __DB_PASS, __DB_INSTANCE);
 
         /* Specify database instance using config constant. */
-        mysql_select_db(__DB_INSTANCE);
+        $dbc->select_db(__DB_INSTANCE);
 
         /* Escape parameters to prevent injection. */
-        $thing_id = mysql_real_escape_string($thing_id);
-        $key = mysql_real_escape_string($key);
-        $value = mysql_real_escape_string($value);
+        $thing_id = $dbc->real_escape_string($thing_id);
+        $key = $dbc->real_escape_string($key);
+        $value = $dbc->real_escape_string($value);
 
         /* Resolve empty strings to null. */
         $thing_id = empty($thing_id) ? 'null' : "'" . $thing_id . "'";
@@ -563,13 +525,8 @@ static function all($thing_id) {
                   AND `key` = $key";
 
         /* Execute query. */
-        mysql_query($query);
-        
-        /* Close MySQL connection. */
-        mysql_close();
+        mysqli_query($dbc, $query);
     }
 }
 
 ?>
-
-
